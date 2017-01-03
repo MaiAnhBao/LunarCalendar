@@ -1,8 +1,5 @@
-/*
- * LCalendar.cpp
- *
- *  Created on: 30 déc. 2016
- *      Author: hnnguyen
+/**
+ * This code is converted from tutorial on the website http://www.informatik.uni-leipzig.de/~duc/amlich/ by Ho Ngoc Duc
  */
 
 #include "LCalendar.h"
@@ -30,7 +27,7 @@ int LCalendar::convertFromDateToJuliusDate(int year, int month, int day) {
 #endif
 	int juliusDate = day + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100
 			+ y / 400 - 32045;
-	if (juliusDate < 2299161) {
+	if (juliusDate < (dayChangeFromJulianToGregorian + 1)) {
 		juliusDate = day + (153 * m + 2) / 5 + 365 * y + y / 4 - 32083;
 	}
 #ifdef LOG
@@ -144,7 +141,7 @@ int LCalendar::getSunLongtitude(int jdn, int timeZone) {
 	std::cout << "LOG " << "getSunLongtitude >>>>>>" << std::endl;
 #endif
 	float T, T2, dr, M, L0, DL, L;
-	T = (jdn - 2451545.5 - timeZone / 24) / 36525; // Time in Julian centuries from 2000-01-01 12:00:00 GMT
+	T = (jdn - 2451545.5 - timeZone / 24) / iJulianDayOfCentury; // Time in Julian centuries from 2000-01-01 12:00:00 GMT
 	T2 = T * T;
 	dr = PI / 180; // degree to radian
 	M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2; // mean anomaly, degree
@@ -182,13 +179,13 @@ int LCalendar::getLunarMonthElevent(int year, int timeZone) {
 	std::cout << "DEBUG: " << "year " << year << " time zone: " << timeZone << std::endl;
 #endif
 	int k, off, nm, sunLong;
-	off = convertFromDateToJuliusDate(year, 12, 31) - 2415021;
+	off = convertFromDateToJuliusDate(year, 12, 31) - iJuliusDateFirstJanuary1900;
 
 #ifdef DEBUG
-	std::cout << "DEBUG: " << "different from " << "2415021 " << "to 31/12/" << year << ": " << off << std::endl;
+	std::cout << "DEBUG: " << "different from " << "1/1/1900 " << "to 31/12/" << year << ": " << off << std::endl;
 #endif
 
-	k = static_cast<int>(off / 29.530588853);
+	k = static_cast<int>(off / fSynodicMonth);
 
 #ifdef DEBUG
 	std::cout << "DEBUG: " << "the order of new moon day " << k << std::endl;
@@ -229,7 +226,7 @@ int LCalendar::getLeapMonthOffset(int a11, int timeZone) {
 	std::cout << "LOG " << "getLeapMonthOffset >>>>>>" << std::endl;
 #endif
 	int k, last, arc, i;
-	k = static_cast<int>((a11 - 2415021.076998695) / 29.530588853 + 0.5);
+	k = static_cast<int>((a11 - 2415021.076998695) / fSynodicMonth + 0.5);
 	last = 0;
 	i = 1; // We start with the month following lunar month 11
 	arc = getSunLongtitude(getNewMoonDay(k + i, timeZone), timeZone);
@@ -260,7 +257,7 @@ void LCalendar::convertSolarToLunar(int dd, int mm, int yy, int timeZone) {
 #ifdef DEBUG
 	std::cout << "DEBUG: " << " julius day  = " << dayNumber << std::endl;
 #endif
-	k = static_cast<int>((dayNumber - 2415021.076998695) / 29.530588853);
+	k = static_cast<int>((dayNumber - 2415021.076998695) / fSynodicMonth);
 #ifdef DEBUG
 	std::cout << "DEBUG: " << "the k-th new moon from 1/1/1900 " << k << std::endl;
 #endif
@@ -382,7 +379,7 @@ std::tm LCalendar::convertLunarToSolar(int lunarDay, int lunarMonth,
 			off += 1;
 		}
 	}
-	k = static_cast<int>(0.5 + (a11 - 2415021.076998695) / 29.530588853);
+	k = static_cast<int>(0.5 + (a11 - 2415021.076998695) / fSynodicMonth);
 	monthStart = getNewMoonDay(k + off, timeZone);
 #ifdef DEBUGSOLAR
 	std::cout << "\033[1;35m" << "DEBUG: " << "month start: " << monthStart << "\033[0m\n" << std::endl;
@@ -466,5 +463,5 @@ void LCalendar::toString() {
 	} else {
 		std::cout << "Not Full Month" << std::endl;
 	}
-	std::cout << "Day " << mLunarDate.mLunarDay << " Month " << mLunarDate.mLunarMonth << " Year " << mLunarDate.mLunarYear << std::endl;
+	std::cout << "\033[1;33m" << "Day " << mLunarDate.mLunarDay << " Month " << mLunarDate.mLunarMonth << " Year " << mLunarDate.mLunarYear << "\033[0m\n" << std::endl;
 }

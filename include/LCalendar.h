@@ -27,6 +27,8 @@ private:
 	const int dayOfYear = 365;
 	const float fJuliusDateFirstJanuary1900 = 2415021.076998695;
 	const int  iJuliusDateFirstJanuary1900 = 2415021;
+	const float fSynodicMonth = 29.530588853;
+	const int iJulianDayOfCentury = 36525;
 
 	const std::vector<std::string> vecCan{""};
 	const std::vector<std::string> vecChi{""};
